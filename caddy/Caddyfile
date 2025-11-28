@@ -19,5 +19,5 @@ http://api.perpixai.com {
 }
 
 http://app.perpixai.com {
-    reverse_proxy http://perpixai-app:4173
+    reverse_proxy http://perpixai-app:80
 }
