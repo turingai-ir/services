@@ -17,3 +17,7 @@ http://cdn-dashboard.perpixai.com {
 http://api.perpixai.com {
     reverse_proxy http://perpixai-api:8000
 }
+
+http://app.perpixai.com {
+    reverse_proxy http://perpixai-app:4173
+}
