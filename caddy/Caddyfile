@@ -1,7 +1,6 @@
 {
     # Global options
     admin off
-    order minify first
 }
 
 # -----------------------------
@@ -36,10 +35,6 @@
     }
 }
 
-(bot_detect) {
-    bot_detect
-}
-
 # -----------------------------
 # API
 # -----------------------------
@@ -47,8 +42,7 @@ http://api.perpixai.com {
     import security_headers
     import cors_policy
     import rate_limit
-    import bot_detect
-    minify
+
     request_body {
         max_size 50MB
     }
@@ -62,7 +56,6 @@ http://api.perpixai.com {
 http://cdn.perpixai.com {
     import security_headers
     import cors_policy
-    import bot_detect
 
     file_server {
         browse
@@ -82,8 +75,6 @@ http://cdn.perpixai.com {
 http://app.perpixai.com {
     import security_headers
     import cors_policy
-    import bot_detect
-    minify
 
     reverse_proxy http://perpixai-app:80
 }
@@ -95,8 +86,7 @@ http://perpixai.com {
     import security_headers
     import cors_policy
     import rate_limit
-    import bot_detect
-    minify
+
     request_body {
         max_size 50MB
     }
