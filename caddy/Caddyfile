@@ -1,21 +1,53 @@
 http://perpixai.com {
-    encode gzip
-    respond "Hello from Caddy on Komodo!" 200
+    reverse_proxy http://perpixai-api:8000
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Content-Security-Policy "default-src 'self';"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
+        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    request_body {
+        max_size 50MB 
+    }
+}
+
+http://cdn.perpixai.com {
+    reverse_proxy http://minio:9000
+    header {
+        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+}
+
+http://api.perpixai.com {
+    reverse_proxy http://perpixai-api:8000
+    header {
+        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Content-Security-Policy "default-src 'self';"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+    }
+    request_body {
+        max_size 50MB 
+    }
 }
 
 http://manager-comodo.perpixai.com {
     reverse_proxy http://core:9120
 }
 
-http://cdn.perpixai.com {
-    reverse_proxy http://minio:9000
-}
-
 http://cdn-dashboard.perpixai.com {
     reverse_proxy http://minio:9001
-}
-http://api.perpixai.com {
-    reverse_proxy http://perpixai-api:8000
 }
 
 http://app.perpixai.com {
