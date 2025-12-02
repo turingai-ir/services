@@ -1,16 +1,13 @@
-http://api.perpixai.com {
-    reverse_proxy http://api:8000
+{
+    # Global options
+    admin off
+    order minify first
+}
 
-    cors {
-        allow_origin https://*.perpixai.com
-        allow_methods GET, POST, PUT, DELETE, OPTIONS
-        allow_headers Content-Type, Authorization
-    }
-
-    request_body {
-        max_size 50MB
-    }
-
+# -----------------------------
+# Snippets
+# -----------------------------
+(security_headers) {
     header {
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
@@ -18,47 +15,103 @@ http://api.perpixai.com {
     }
 }
 
-http://cdn.perpixai.com {
-    reverse_proxy http://minio:9000
+(cors_policy) {
+    @origin origin https://perpixai.com https://*.perpixai.com
+    header @origin Access-Control-Allow-Origin "%{http.origin}"
+    header {
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+        Access-Control-Allow-Credentials "true"
+    }
+    @options method OPTIONS
+    respond @options 204
+}
 
-    cors {
-        allow_origin https://*.perpixai.com
-        allow_methods GET, POST, PUT, DELETE, OPTIONS
-        allow_headers Content-Type, Authorization
+(rate_limit) {
+    rate_limit {
+        zone api {
+            interval 1m
+            burst 30
+        }
     }
 }
 
-http://app.perpixai.com {
-    reverse_proxy http://perpixai-app:80
-
-    cors {
-        allow_methods GET, POST, PUT, DELETE, OPTIONS
-        allow_headers Content-Type, Authorization
-    }
+(bot_detect) {
+    bot_detect
 }
 
-header {
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-    X-XSS-Protection "1; mode=block"
-}
-
-log {
-    rotate {
-        max_size 100MB
-        max_age 30d
-        max_backups 5
-    }
-}
-
-http://perpixai.com {
-    reverse_proxy http://perpixai-api:8000
-    cors {
-        allow_origin https://*.perpixai.com
-        allow_methods GET, POST, PUT, DELETE, OPTIONS
-        allow_headers Content-Type, Authorization
-    }
+# -----------------------------
+# API
+# -----------------------------
+http://api.perpixai.com {
+    import security_headers
+    import cors_policy
+    import rate_limit
+    import bot_detect
+    minify
     request_body {
         max_size 50MB
+    }
+
+    reverse_proxy http://api:8000
+}
+
+# -----------------------------
+# CDN (MinIO) با caching
+# -----------------------------
+http://cdn.perpixai.com {
+    import security_headers
+    import cors_policy
+    import bot_detect
+
+    file_server {
+        browse
+        # default cache policy for static files
+        cache {
+            match_path *
+            default_max_age 7d
+        }
+    }
+
+    reverse_proxy http://minio:9000
+}
+
+# -----------------------------
+# Front-end App
+# -----------------------------
+http://app.perpixai.com {
+    import security_headers
+    import cors_policy
+    import bot_detect
+    minify
+
+    reverse_proxy http://perpixai-app:80
+}
+
+# -----------------------------
+# Root domain
+# -----------------------------
+http://perpixai.com {
+    import security_headers
+    import cors_policy
+    import rate_limit
+    import bot_detect
+    minify
+    request_body {
+        max_size 50MB
+    }
+
+    reverse_proxy http://perpixai-api:8000
+}
+
+# -----------------------------
+# Logging
+# -----------------------------
+log {
+    output file /var/log/caddy/access.log {
+        roll_size 100MB
+        roll_keep 5
+        roll_keep_for 720h
+        format json
     }
 }
