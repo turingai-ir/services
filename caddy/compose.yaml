@@ -1,6 +1,10 @@
+version: "3.7"
+
 services:
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: caddy
     restart: unless-stopped
     networks:
@@ -13,11 +17,10 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
-volumes:
-  caddy_data:
-  caddy_config:
-
-
 networks:
   turing:
     external: true
+
+volumes:
+  caddy_data:
+  caddy_config:

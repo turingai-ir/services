@@ -1,55 +1,64 @@
-http://perpixai.com {
-    reverse_proxy http://perpixai-api:8000
+http://api.perpixai.com {
+    reverse_proxy http://api:8000
+
+    cors {
+        allow_origin https://*.perpixai.com
+        allow_methods GET, POST, PUT, DELETE, OPTIONS
+        allow_headers Content-Type, Authorization
+    }
+
+    request_body {
+        max_size 50MB
+    }
+
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        Content-Security-Policy "default-src 'self';"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
         X-XSS-Protection "1; mode=block"
-        Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-    }
-    request_body {
-        max_size 50MB 
     }
 }
 
 http://cdn.perpixai.com {
     reverse_proxy http://minio:9000
-    header {
-        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-    }
-}
 
-http://api.perpixai.com {
-    reverse_proxy http://perpixai-api:8000
-    header {
-        Access-Control-Allow-Origin "http://perpix.com http://localhost:5173"
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        Content-Security-Policy "default-src 'self';"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        X-XSS-Protection "1; mode=block"
+    cors {
+        allow_origin https://*.perpixai.com
+        allow_methods GET, POST, PUT, DELETE, OPTIONS
+        allow_headers Content-Type, Authorization
     }
-    request_body {
-        max_size 50MB 
-    }
-}
-
-http://manager-comodo.perpixai.com {
-    reverse_proxy http://core:9120
-}
-
-http://cdn-dashboard.perpixai.com {
-    reverse_proxy http://minio:9001
 }
 
 http://app.perpixai.com {
     reverse_proxy http://perpixai-app:80
+
+    cors {
+        allow_methods GET, POST, PUT, DELETE, OPTIONS
+        allow_headers Content-Type, Authorization
+    }
+}
+
+header {
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    X-XSS-Protection "1; mode=block"
+}
+
+log {
+    rotate {
+        max_size 100MB
+        max_age 30d
+        max_backups 5
+    }
+}
+
+http://perpixai.com {
+    reverse_proxy http://perpixai-api:8000
+    cors {
+        allow_origin https://*.perpixai.com
+        allow_methods GET, POST, PUT, DELETE, OPTIONS
+        allow_headers Content-Type, Authorization
+    }
+    request_body {
+        max_size 50MB
+    }
 }
