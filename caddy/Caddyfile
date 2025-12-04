@@ -1,68 +1,24 @@
-# ================== CORS SNIPPET ==================
-(cors_perpixai) {
-	# فقط این Originها مجازند:
-	# https://perpixai.com
-	# https://api.perpixai.com
-	# https://app.perpixai.com
-	# http://localhost:8000
-	# http://localhost:5173
-	# http://localhost:5500
-
-	@cors_allowed expression `{http.request.header.Origin} == "https://perpixai.com" || {http.request.header.Origin} == "https://api.perpixai.com" || {http.request.header.Origin} == "https://app.perpixai.com" || {http.request.header.Origin} == "http://localhost:8000" || {http.request.header.Origin} == "http://localhost:5173" || {http.request.header.Origin} == "http://localhost:5500"`
-
-	# همه هدرهای CORS قبلی پاک بشن (اگر از backend اومده باشن)
-	header {
-		-Access-Control-Allow-Origin
-		-Access-Control-Allow-Credentials
-		-Access-Control-Allow-Methods
-		-Access-Control-Allow-Headers
-	}
-
-	# برای Originهای مجاز، هدرهای CORS ست می‌شن
-	header @cors_allowed {
-		Access-Control-Allow-Origin "{http.request.header.Origin}"
-		Access-Control-Allow-Credentials "true"
-		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-		Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
-	}
-
-	# preflight OPTIONS
-	@preflight {
-		method OPTIONS
-		expression `{http.request.header.Origin} == "https://perpixai.com" || {http.request.header.Origin} == "https://api.perpixai.com" || {http.request.header.Origin} == "https://app.perpixai.com" || {http.request.header.Origin} == "http://localhost:8000" || {http.request.header.Origin} == "http://localhost:5173" || {http.request.header.Origin} == "http://localhost:5500"`
-	}
-
-	respond @preflight "" 204
-}
-
-# ================== SITES ==================
 
 http://api.perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://perpixai-api:8000
 }
 
 http://app.perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://perpixai-app:80
 }
 
 http://cdn-dashboard.perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://minio:9001
 }
 
 http://cdn.perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://minio:9000
 }
 
 http://manager-comodo.perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://core:9120
 }
 
 http://perpixai.com {
-	import cors_perpixai
 	reverse_proxy http://landing-root:80
 }
