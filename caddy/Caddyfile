@@ -1,107 +1,66 @@
-{
-    # Global options
-    admin off
+
+
+(cors_perpixai) {
+
+
+	@allowed_origin header_regexp Origin ^https?:
+
+	
+	header @allowed_origin Access-Control-Allow-Origin "{http.request.header.Origin}"
+	header @allowed_origin Access-Control-Allow-Credentials "true"
+	header @allowed_origin Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+	header @allowed_origin Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+
+	@preflight {
+		method OPTIONS
+		header_regexp Origin ^https?:
+	}
+	handle @preflight {
+		header Access-Control-Allow-Origin "{http.request.header.Origin}"
+		header Access-Control-Allow-Credentials "true"
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+		respond "" 204
+	}
 }
 
-# -----------------------------
-# Snippets
-# -----------------------------
-(security_headers) {
-    header {
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        X-XSS-Protection "1; mode=block"
-    }
-}
 
-(cors_policy) {
-    @origin origin https://perpixai.com https://*.perpixai.com
-    header @origin Access-Control-Allow-Origin "%{http.origin}"
-    header {
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-        Access-Control-Allow-Credentials "true"
-    }
-    @options method OPTIONS
-    respond @options 204
-}
 
-(rate_limit) {
-    rate_limit {
-        zone api {
-            interval 1m
-            burst 30
-        }
-    }
-}
-
-# -----------------------------
-# API
-# -----------------------------
 http://api.perpixai.com {
-    import security_headers
-    import cors_policy
-    import rate_limit
-
-    request_body {
-        max_size 50MB
-    }
-
-    reverse_proxy http://api:8000
+	import cors_perpixai
+	reverse_proxy http://perpixai-api:8000
 }
 
-# -----------------------------
-# CDN (MinIO) با caching
-# -----------------------------
-http://cdn.perpixai.com {
-    import security_headers
-    import cors_policy
 
-    file_server {
-        browse
-        # default cache policy for static files
-        cache {
-            match_path *
-            default_max_age 7d
-        }
-    }
-
-    reverse_proxy http://minio:9000
-}
-
-# -----------------------------
-# Front-end App
-# -----------------------------
 http://app.perpixai.com {
-    import security_headers
-    import cors_policy
-
-    reverse_proxy http://perpixai-app:80
+	import cors_perpixai
+	reverse_proxy http://perpixai-app:80
 }
 
-# -----------------------------
-# Root domain
-# -----------------------------
+
+http://cdn-dashboard.perpixai.com {
+	import cors_perpixai
+	reverse_proxy http://minio:9001
+}
+
+
+http://cdn.perpixai.com {
+	import cors_perpixai
+	reverse_proxy http://minio:9000
+}
+
+
+http://manager-comodo.perpixai.com {
+	import cors_perpixai
+	reverse_proxy http://core:9120
+}
+
+
+
+
 http://perpixai.com {
-    import security_headers
-    import cors_policy
-    import rate_limit
-
-    request_body {
-        max_size 50MB
-    }
-
-    reverse_proxy http://perpixai-api:8000
+	import cors_perpixai
+	reverse_proxy http://landing-root:80
 }
 
-# -----------------------------
-# Logging
-# -----------------------------
-log {
-    output file /var/log/caddy/access.log {
-        roll_size 100MB
-        roll_keep 5
-        roll_keep_for 720h
-        format json
-    }
-}
