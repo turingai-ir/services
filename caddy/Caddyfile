@@ -20,6 +20,10 @@ api.perpixai.ir {
 	reverse_proxy http://perpix-api:8000
 }
 
+mathesar.perpixai.ir {
+	reverse_proxy http://mathesar-web:8000
+}
+
 app.perpixai.ir {
 	@sw_file {
 		path /sw.js

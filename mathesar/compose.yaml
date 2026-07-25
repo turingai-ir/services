@@ -1,0 +1,57 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  web:
+    image: mathesar/mathesar:latest
+    container_name: mathesar-web
+    mem_limit: 512m
+    cpus: "0.30"
+    logging: *default-logging
+    restart: unless-stopped
+    networks:
+      - perpix
+    environment:
+      DOMAIN_NAME: ${MATHESAR_DOMAIN_NAME:-mathesar.perpixai.ir}
+      POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+      POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres-python}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      FILE_STORAGE_DICT: ${MATHESAR_FILE_STORAGE_DICT:-{}}
+      SSO_CONFIG_DICT: ${MATHESAR_SSO_CONFIG_DICT:-{}}
+      OIDC_CONFIG_DICT: ${MATHESAR_OIDC_CONFIG_DICT:-{}}
+      REQUIRE_SSO_LOGIN: ${MATHESAR_REQUIRE_SSO_LOGIN:-false}
+      MATHESAR_DJANGO_ADMIN_ENABLED: ${MATHESAR_DJANGO_ADMIN_ENABLED:-false}
+      MATHESAR_INSTANCE_NAME: ${MATHESAR_INSTANCE_NAME:-Perpix Mathesar}
+      ALLOWED_HOSTS: ${MATHESAR_ALLOWED_HOSTS:-*}
+      DEBUG: ${DEBUG:-false}
+      SECRET_KEY: ${MATHESAR_SECRET_KEY:-mathesar_secret_key_change_me_in_prod}
+      WEB_CONCURRENCY: ${MATHESAR_WEB_CONCURRENCY:-1}
+      PER_USER_DATABASES_ENABLED: ${MATHESAR_PER_USER_DATABASES_ENABLED:-false}
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      TZ: ${TZ:-UTC}
+    volumes:
+      - mathesar_static:/code/static
+      - mathesar_media:/code/.media
+      - mathesar_secrets:/code/.secrets
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/healthz/ready/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+networks:
+  perpix:
+    external: true
+
+volumes:
+  mathesar_static:
+  mathesar_media:
+  mathesar_secrets:
