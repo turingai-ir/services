@@ -1,40 +1,37 @@
-komodo.perpixai.ir {
+http://komodo.perpixai.ir {
     reverse_proxy komodo-core:9120
 }
 
-cdn-dashboard.perpixai.ir {
-	reverse_proxy http://rustfs:9001
+http://cdn-dashboard.perpixai.ir {
+    reverse_proxy http://rustfs:9001
 }
 
-cdn.perpixai.ir {
-	reverse_proxy http://rustfs:9000
+http://cdn.perpixai.ir {
+    reverse_proxy http://rustfs:9000
 }
 
-
-cdn.perpixai.com {
-		reverse_proxy http://rustfs:9000
+http://cdn.perpixai.com {
+    reverse_proxy http://rustfs:9000
 }
 
-
-api.perpixai.ir {
-	reverse_proxy http://perpix-api:8000
+http://api.perpixai.ir {
+    reverse_proxy http://perpix-api:8000
 }
 
-mathesar.perpixai.ir {
-	reverse_proxy http://mathesar-web:8000
+http://mathesar.perpixai.ir {
+    reverse_proxy http://mathesar-web:8000
 }
 
-app.perpixai.ir {
-	@html_file path / /index.html
-	header @html_file Cache-Control "no-cache, must-revalidate, max-age=0"
+http://app.perpixai.ir {
+    @html_file path / /index.html
+    header @html_file Cache-Control "no-cache, must-revalidate, max-age=0"
 
-	@hashed_asset path /assets/* /fonts/*
-	header @hashed_asset Cache-Control "public, max-age=31536000, immutable"
+    @hashed_asset path /assets/* /fonts/*
+    header @hashed_asset Cache-Control "public, max-age=31536000, immutable"
 
-	reverse_proxy http://perpix-app:8080
+    reverse_proxy http://perpix-app:8080
 }
 
-
-perpixai.ir {
-	reverse_proxy http://perpix-main-landing:8080
+http://perpixai.ir {
+    reverse_proxy http://perpix-main-landing:8080
 }
